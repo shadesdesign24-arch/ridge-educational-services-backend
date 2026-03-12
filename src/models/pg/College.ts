@@ -7,6 +7,7 @@ export class College extends Model {
   public location!: string;
   public description!: string;
   public website!: string;
+  public logo!: string;
   public yearWiseFees!: any; // Storing array of { year: number, amount: string }
   public admissionFee!: string;
   public healthCardFee!: string;
@@ -33,6 +34,10 @@ College.init(
       allowNull: true,
     },
     website: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    logo: {
       type: DataTypes.STRING,
       allowNull: true,
     },

@@ -7,10 +7,14 @@ import bcrypt from 'bcryptjs';
 
 export const addCollege = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, location, description, website, cutoffs, yearWiseFees, admissionFee, healthCardFee, applicationFee } = req.body;
+    // When using multer with form-data, JSON fields come as strings
+    const { name, location, description, website, admissionFee, healthCardFee, applicationFee } = req.body;
+    const cutoffs = req.body.cutoffs ? JSON.parse(req.body.cutoffs) : [];
+    const yearWiseFees = req.body.yearWiseFees ? JSON.parse(req.body.yearWiseFees) : [];
+    const logo = (req as any).file ? `/uploads/logos/${(req as any).file.filename}` : null;
 
     const college = await College.create({
-      name, location, description, website,
+      name, location, description, website, logo,
       yearWiseFees, admissionFee, healthCardFee, applicationFee
     });
 
@@ -39,11 +43,15 @@ export const addCollege = async (req: Request, res: Response): Promise<void> => 
 export const editCollege = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { name, location, description, website, yearWiseFees, admissionFee, healthCardFee, applicationFee } = req.body;
-    await College.update({ 
-      name, location, description, website,
-      yearWiseFees, admissionFee, healthCardFee, applicationFee
-    }, { where: { id } });
+    const { name, location, description, website, admissionFee, healthCardFee, applicationFee } = req.body;
+    const yearWiseFees = req.body.yearWiseFees ? JSON.parse(req.body.yearWiseFees) : undefined;
+    const logo = (req as any).file ? `/uploads/logos/${(req as any).file.filename}` : undefined;
+
+    const updateData: any = { name, location, description, website, admissionFee, healthCardFee, applicationFee };
+    if (yearWiseFees !== undefined) updateData.yearWiseFees = yearWiseFees;
+    if (logo) updateData.logo = logo;
+
+    await College.update(updateData, { where: { id } });
     const updated = await College.findByPk(Number(id), { include: [{ model: CutoffMarks, as: 'cutoffs' }] });
     res.status(200).json({ message: 'College updated', college: updated });
   } catch (error) {

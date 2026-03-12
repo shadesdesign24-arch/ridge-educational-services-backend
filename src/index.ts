@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import { connectPostgres, connectMongo, sequelize } from './config/db';
 
 import authRoutes from './routes/authRoutes';
@@ -16,6 +17,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Serve uploaded files (college logos)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Init DBs
 connectPostgres().then(() => {
   sequelize.sync({ alter: true }).then(() => {
@@ -28,10 +32,10 @@ connectPostgres().then(() => {
 connectMongo();
 
 // Routes
-app.use('/api', guestRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/employee', employeeRoutes);
+app.use('/ridge-backend', guestRoutes);
+app.use('/ridge-backend/auth', authRoutes);
+app.use('/ridge-backend/admin', adminRoutes);
+app.use('/ridge-backend/employee', employeeRoutes);
 
 app.get('/', (req, res) => {
   res.send('Ridge Educational API Server Subsystem Running');
